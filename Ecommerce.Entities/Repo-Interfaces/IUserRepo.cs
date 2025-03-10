@@ -1,0 +1,16 @@
+﻿using Ecommerce.Entities.Models;
+using Ecommerce.Shared.DTOS;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Ecommerce.Entities.Repo_Interfaces
+{
+    public interface IUserRepo:IGenericRepo<User>
+    {
+        Task<bool> RegisterUser(RegisterUserDto userdto);
+        Task<string> LoginUser(LoginUserDto userdto);
+    }
+}
