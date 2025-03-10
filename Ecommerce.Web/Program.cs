@@ -16,13 +16,24 @@ namespace Ecommerce.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
+            var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "EcommerceDb";
+            var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "Norhan";
+            var dbPass = Environment.GetEnvironmentVariable("DB_PASS") ?? "Norhan@123";
+
+            var connectionString = $"Host={dbHost};Port=5432;Database={dbName};Username={dbUser};Password={dbPass}";
             // Add services to the container.
 
             builder.Services.AddControllers();
 
+            //builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            //options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(connectionString));
+
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -77,6 +88,12 @@ namespace Ecommerce.Web
             });
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                dbContext.Database.Migrate();
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
